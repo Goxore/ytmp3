@@ -1,6 +1,6 @@
 #!/bin/sh
 # https://github.com/Goxore/ytmp3
-REQUIREMENTS=('yt-dlp')
+# REQUIREMENTS=('yt-dlp')
 
 downloaddir=$HOME/Music
 
@@ -13,9 +13,9 @@ cd $downloaddir
 
 if command -v yt-dlp &> /dev/null
 then
-  downloader=youtube-dl
-else
   downloader=yt-dlp
+else
+  downloader=youtube-dl
 fi
 
 while test $# -gt 0; do
@@ -64,6 +64,10 @@ while test $# -gt 0; do
       menu="rofi"
       shift
       ;;
+    -n|--notify)
+      notify="true"
+      shift
+      ;;
     *)
       break
       ;;
@@ -71,22 +75,22 @@ while test $# -gt 0; do
 done
 
 input=$1
-echo $menu
-echo $useclipboard
 
-if [ $menu = "rofi" ]; then
+if [ "$menu" = "rofi" ]; then
   output=$(rofi -dmenu)
   useclipboard="true"
 fi
 
-if [ $menu = "dmenu" ]; then
-  output=$(dmenu)
-  useclipboard="true"
-fi
+#if [ $menu = "dmenu" ]; then
+#  output=$(dmenu)
+#  useclipboard="true"
+#fi
 
-if [ $useclipboard = "true" ]; then
+if [ "$useclipboard" = "true" ]; then
   input=$(xclip -o -sel c)
 fi
+
+[ -n "$notify" ] && notify-send "Downloading $input"
 
 if [ -n "$output" ]; then
   $downloader -x --audio-format mp3 --prefer-ffmpeg $input -o "$output.mp3"
@@ -102,4 +106,4 @@ then
 fi
 
 echo $file
-notify-send "Download finished :)"
+[ -n "$notify" ] && notify-send "Your download is finished :)"
